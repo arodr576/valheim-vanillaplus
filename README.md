@@ -1,30 +1,42 @@
 # Valheim Vanilla+
 
-Client modpack releases for our Valheim server, with the unofficial **Valheim Companion** Windows updater.
+Client modpack releases for our Valheim server and the unofficial **Valheim Companion** Windows updater.
+
+## Downloads
+
+- [**Companion Player Installer — v0.16.2**](https://github.com/arodr576/valheim-vanillaplus/releases/tag/companion-v0.16.2)
+- [**Latest Valheim Vanilla+ modpack**](https://github.com/arodr576/valheim-vanillaplus/releases/latest)
+
+The app installer and modpack now have separate release pages. Older Companion ZIPs are historical downloads.
 
 ## Players
 
-1. Open the [latest release](https://github.com/arodr576/valheim-vanillaplus/releases/latest).
-2. Download **ValheimCompanion-v0.5.zip**, extract it, and run **ValheimCompanion.exe**.
-3. Choose the folder containing your `valheim.exe`.
+1. Open the Companion installer page above and download **ValheimCompanion-v0.16.2-x64.msi**.
+2. Close any running Companion app, run setup, and choose your shortcuts. New installations can choose a writable installation folder; MSI upgrades keep the existing folder and settings.
+3. Open **Valheim Companion** and confirm the detected folder containing `valheim.exe`.
 4. Click **Check / Verify**, review the release, close Valheim, then click **Install / Repair**.
+5. Use **Play Valheim** with Steam running.
 
-The app already has the update feed configured. Keep using this address for future releases:
+The player installer includes no admin launcher, admin shortcut, admin screen, or release-building code. The installer is unsigned, so Windows may show an unrecognized-app warning. A SHA256 checksum is available on its download page.
+
+The update feed is already configured:
 
 ```text
 https://github.com/arodr576/valheim-vanillaplus/releases/latest/download/release.json
 ```
 
-Updates verify SHA256 checksums and create a rollback backup. Managed mod settings are replaced by the release's settings. Extra unmanaged plugins are preserved and listed for review. Avoid having Vortex manage the same files. World saves are not managed by the updater.
+Updates verify SHA256 checksums and create a rollback backup. Managed mod settings are replaced by the release settings. Extra unmanaged plugins are preserved and listed for review. Avoid having Vortex manage the same files. World saves are not managed by the updater.
 
-The release also includes the modpack ZIP for manual installation. Its version-specific download is pinned by the manifest, so a changing latest release cannot silently substitute another ZIP during installation.
+The latest modpack release includes its ZIP and release.json for manual downloads. The manifest pins the version-specific package URL.
 
-## Admin
+## Server administration
 
-Use the app's **Admin / Build release** screen with the prepared client staging folder and a known-good BepInEx 5 installation. Confirm the shared gameplay mods match the server using the existing DLL-report workflow. The app does not connect to or update the dedicated server.
+Server administration uses a separate Admin build, distributed separately from the public player installer. Use its **Admin / Build release** screen with prepared client staging and a known-good BepInEx 5 installation. Confirm shared gameplay mods match the server through the existing DLL-report workflow. Companion does not connect to or update the dedicated server.
 
-The app ZIP contains source, build instructions, and `Publish-GitHub.ps1` for future releases. Upload the ZIP and `release.json` together, then publish the release as latest. Keep this repository's latest release dedicated to the modpack feed; an app-only release without `release.json` would break the stable feed address.
+Publish modpack ZIPs and release.json together. Keep the repository **Latest** label on the current modpack release so the update feed continues working. Companion-only releases use their own tags and must not replace that latest modpack release.
 
-The first app-backed release passed 33 synthetic integration checks and a file-level install/verify/rollback test using the real 1.0.1 pack. Public downloads were verified against the original files. A live desktop HTTPS and gameplay test on a spare client remains the next validation step.
+## Validation
 
-This is an unofficial community tool. Valheim, its logo, and included third-party mods belong to their respective rights holders. Attribution and mod-package documentation are included with the downloads.
+Companion v0.16.2 passed 59 existing engine integration checks, Player/Admin capability and settings-save checks, and MSI build/payload validation. Full installation and upgrade testing of this revision remains outstanding. See each release page for its validation details.
+
+This is an unofficial community tool. Valheim, its logo, and included third-party mods belong to their respective rights holders. Attribution and mod-package documentation accompany the relevant downloads.
