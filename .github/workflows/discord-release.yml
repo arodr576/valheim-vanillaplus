@@ -1,0 +1,92 @@
+name: Discord Release Notification
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notify-discord:
+    name: Post release to Discord
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Discord notification
+        shell: bash
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          RELEASE_PUBLISHED_AT: ${{ github.event.release.published_at }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${DISCORD_WEBHOOK_URL:-}" ]]; then
+            echo "DISCORD_WEBHOOK_URL secret is not configured."
+            exit 1
+          fi
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            TITLE="🧪 Valheim Mod Manager Discord Test"
+            TAG="TEST"
+            URL="$REPOSITORY_URL"
+            NOTES="The GitHub → Discord notification workflow is connected and working."
+            PUBLISHED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          else
+            TITLE="🚀 ${RELEASE_NAME:-Valheim Mod Manager Update}"
+            TAG="${RELEASE_TAG:-Unknown}"
+            URL="${RELEASE_URL:-$REPOSITORY_URL}"
+            NOTES="${RELEASE_BODY:-No release notes were provided.}"
+            PUBLISHED_AT="${RELEASE_PUBLISHED_AT:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}"
+          fi
+
+          # Discord embed descriptions are limited to 4096 characters.
+          NOTES="$(printf '%s' "$NOTES" | head -c 3800)"
+
+          PAYLOAD="$(
+            jq -n               --arg title "$TITLE"               --arg url "$URL"               --arg tag "$TAG"               --arg notes "$NOTES"               --arg repo "$REPOSITORY"               --arg published "$PUBLISHED_AT"               '{
+                username: "Valheim Mod Manager",
+                allowed_mentions: {parse: []},
+                embeds: [
+                  {
+                    title: $title,
+                    url: $url,
+                    description: $notes,
+                    color: 5814783,
+                    fields: [
+                      {
+                        name: "Version",
+                        value: $tag,
+                        inline: true
+                      },
+                      {
+                        name: "Status",
+                        value: "Released",
+                        inline: true
+                      },
+                      {
+                        name: "Download",
+                        value: ("[Open GitHub Release](" + $url + ")"),
+                        inline: false
+                      }
+                    ],
+                    footer: {
+                      text: $repo
+                    },
+                    timestamp: $published
+                  }
+                ]
+              }'
+          )"
+
+          curl             --fail-with-body             --silent             --show-error             -H "Content-Type: application/json"             -d "$PAYLOAD"             "$DISCORD_WEBHOOK_URL"
+
+          echo "Discord notification sent successfully."
